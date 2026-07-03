@@ -1,4 +1,5 @@
 import gettext
+import math
 
 # pylint: disable=wrong-import-order,wrong-import-position
 import gi
@@ -20,6 +21,7 @@ class VolumeWidget(Gtk.Scale):
         self.is_pressed: bool = False
         self.scroll_lock_timeout = None
         self._signal_handler_id = None
+        self.display_mode = 'percent'
 
         super().__init__(*args, **kwargs)
 
@@ -42,6 +44,15 @@ class VolumeWidget(Gtk.Scale):
 
         self._setup_gesture_controllers()
         self._signal_handler_id = self.connect('value-changed', self._on_value_changed)
+        self.set_format_value_func(self._on_format_value)
+
+        # Center the text for multi-line values
+        child = self.get_first_child()
+        while child is not None:
+            if isinstance(child, Gtk.Label):
+                child.set_justify(Gtk.Justification.CENTER)
+                break
+            child = child.get_next_sibling()
 
     def _setup_gesture_controllers(self):
         '''Setup gesture controllers for GTK 4 event handling'''
@@ -97,6 +108,20 @@ class VolumeWidget(Gtk.Scale):
     def _on_value_changed(self, widget):
         self.emit('volume', widget.get_value())
 
+    def _on_format_value(self, scale, value):
+        if self.display_mode == 'percent':
+            return f'{int(value)}%'
+        if value <= 0:
+            return '-∞ dB'
+        # PulseAudio uses a cubic volume scale: linear = (percent/100)^3
+        # dB = 20 * log10(linear) = 60 * log10(percent/100)
+        db = 60 * math.log10(value / 100)
+        return f'{db:.2f}\ndB'
+
+
+    def set_display_mode(self, mode):
+        self.display_mode = mode
+        self.set_format_value_func(self._on_format_value)
     def set_volume(self, value):
         if self.blocked is True:
             return

@@ -130,6 +130,7 @@ class GtkController(SignalModel):
         '''
         arrange_device = layout_manager.get_arrange_device(self.config_model.layout)
         device_widget = DeviceWidget(device_model)
+        device_widget.volume_widget.set_display_mode('db' if self.config_model.db_display else 'percent')
         arrange_device(device_widget)
         # arrange_device_settings(device_widget.popover)
         self.content.device_box[device_type].add_widget(device_id, device_widget)
@@ -192,6 +193,7 @@ class GtkController(SignalModel):
         '''
         arrange_app = layout_manager.get_arrange_app(self.config_model.layout)
         app_widget = AppWidget(app_model)
+        app_widget.volume_widget.set_display_mode('db' if self.config_model.db_display else 'percent')
         arrange_app(app_widget)
         self.content.app_box[app_type].add_widget(app_index, app_widget)
         self.connect_app_gtk_events(app_type, app_index, app_widget)
@@ -289,6 +291,14 @@ class GtkController(SignalModel):
     def settings_menu_apply(self, _, config_schema):
         vumeters_changed = self.config_model.vumeters != config_schema['vumeters']
         self.config_model.vumeters = config_schema['vumeters']
+        self.config_model.db_display = config_schema['db_display']
+        for device_type in ('a', 'b', 'vi', 'hi'):
+            for device_widget in self.content.device_box[device_type].widgets.values():
+                device_widget.volume_widget.set_display_mode('db' if self.config_model.db_display else 'percent')
+
+        for app_type in ('sink_input', 'source_output'):
+            for app_widget in self.content.app_box[app_type].widgets.values():
+                app_widget.volume_widget.set_display_mode('db' if self.config_model.db_display else 'percent')
         self.config_model.cleanup = config_schema['cleanup']
         self.config_model.tray = config_schema['tray']
         layout_changed = self.config_model.layout != config_schema['layout']

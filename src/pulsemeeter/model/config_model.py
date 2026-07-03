@@ -25,6 +25,7 @@ class ConfigModel(BaseModel):
     cleanup: bool = False
     tray: bool = False
     layout: str = 'Blocks'
+    db_display: bool = False
     window_width: int = 800
     window_height: int = 600
 

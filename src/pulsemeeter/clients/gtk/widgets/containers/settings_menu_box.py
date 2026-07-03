@@ -31,6 +31,7 @@ class SettingsMenuBox(Gtk.Box):
         # self.get_accessible().set_name(_('Settings'))
         # self.config_model = config_model
         self.vumeters = Gtk.CheckButton(label=_('Enable VU Meters'))
+        self.db_display = Gtk.CheckButton(label=_('Show volume in dB'))
         self.cleanup = Gtk.CheckButton(label=_('Enable Cleanup'))
         self.tray = Gtk.CheckButton(label=_('Enable Tray'))
         self.layout = LabeledDropDown(_('Layout '))
@@ -53,6 +54,7 @@ class SettingsMenuBox(Gtk.Box):
         )
         self.tray.set_tooltip_text(_('Enable or disable %s') % ('closing to the tray'))
         self.vumeters.set_tooltip_text(_('Enable or disable %s') % _('VU Meter (volume peak)'))
+        self.db_display.set_tooltip_text(_('Enable or disable %s') % _('Volume display in decibels(dB)'))
         self.cleanup.set_tooltip_text(_('Enable or disable %s') % ('cleaning up devices and connections upon closing'))
         self.layout.set_tooltip_text(_('Select the GUI layout'))
 
@@ -62,6 +64,7 @@ class SettingsMenuBox(Gtk.Box):
 
         mainbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         mainbox.append(self.vumeters)
+        mainbox.append(self.db_display)
         mainbox.append(self.cleanup)
         # mainbox.append(self.tray)
         mainbox.append(self.layout)
@@ -75,12 +78,14 @@ class SettingsMenuBox(Gtk.Box):
     def fill_settings(self, config_model):
         self.tray.set_active(config_model.tray)
         self.vumeters.set_active(config_model.vumeters)
+        self.db_display.set_active(config_model.db_display)
         self.cleanup.set_active(config_model.cleanup)
         self.layout.set_active_name(config_model.layout)
 
     def to_schema(self):
         return {
             'vumeters': self.vumeters.get_active(),
+            'db_display' : self.db_display.get_active(),
             'cleanup': self.cleanup.get_active(),
             'tray': self.tray.get_active(),
             'layout': self.layout.get_active_text(),
