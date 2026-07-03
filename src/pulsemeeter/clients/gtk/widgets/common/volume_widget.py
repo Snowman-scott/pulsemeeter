@@ -113,8 +113,6 @@ class VolumeWidget(Gtk.Scale):
             return f'{int(value)}%'
         if value <= 0:
             return '-∞ dB'
-        # PulseAudio uses a cubic volume scale: linear = (percent/100)^3
-        # dB = 20 * log10(linear) = 60 * log10(percent/100)
         db = 60 * math.log10(value / 100)
         return f'{db:.2f}\ndB'
 
